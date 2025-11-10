@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  rag-api:
+    build:
+      context: .
+      dockerfile: apps/rag-api/Dockerfile
+    container_name: rag-api
+    ports:
+      - "3000:3000"
+    environment:
+      # Server config
+      NODE_ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
+
+      # Vector store config
+      VECTOR_STORE_PROVIDER: filesystem
+      VECTOR_STORE_PATH: /app/data/vectors
+
+      # Embedding config (use mock for development, or set OpenAI key)
+      EMBEDDING_PROVIDER: mock
+      EMBEDDING_DIMENSION: 384
+      # Uncomment and set for OpenAI:
+      # EMBEDDING_PROVIDER: openai
+      # OPENAI_API_KEY: sk-...
+      # EMBEDDING_MODEL: text-embedding-3-small
+
+      # Chunking config
+      CHUNKING_STRATEGY: recursive
+      CHUNK_SIZE: 512
+      CHUNK_OVERLAP: 50
+
+      # Query config
+      QUERY_TOP_K: 5
+      QUERY_MIN_SCORE: 0.7
+    volumes:
+      # Persist vector data
+      - rag-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  rag-data:
+    driver: local
