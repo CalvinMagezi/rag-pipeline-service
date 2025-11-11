@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const RAG_API_URL = process.env.RAG_API_URL || 'http://localhost:8888';
-
 export async function POST(request: NextRequest) {
   try {
+    const RAG_API_URL = 'http://rag-api:8888';
     const body = await request.json();
     const { query, topK = 5, minScore = 0.1 } = body;
 
