@@ -18,12 +18,14 @@
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
     "@types/uuid": "^9.0.7",
     "typescript": "5.9.2"
   },
   "optionalDependencies": {
     "openai": "^4.20.0",
     "pdf-parse": "^1.1.1",
-    "@google/generative-ai": "^0.15.0"
+    "@google/generative-ai": "^0.15.0",
+    "pg": "^8.11.3"
   }
 }

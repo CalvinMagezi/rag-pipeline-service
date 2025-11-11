@@ -78,6 +78,14 @@ export function loadConfig(): AppConfig {
     vectorStore: {
       provider: (process.env.VECTOR_STORE_PROVIDER as any) || 'in-memory',
       storagePath: process.env.VECTOR_STORE_PATH || './data/vectors',
+      // PostgreSQL config
+      host: process.env.POSTGRES_HOST || 'localhost',
+      port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+      database: process.env.POSTGRES_DB || 'ragdb',
+      user: process.env.POSTGRES_USER || 'raguser',
+      password: process.env.POSTGRES_PASSWORD,
+      table: process.env.POSTGRES_TABLE || 'vectors',
+      maxConnections: parseInt(process.env.POSTGRES_MAX_CONNECTIONS || '10', 10),
     },
     embedding: {
       provider: (process.env.EMBEDDING_PROVIDER as any) || 'mock',
@@ -109,9 +117,13 @@ export function loadConfig(): AppConfig {
   if (config.embedding.provider === 'openai' && !config.embedding.apiKey) {
     throw new Error('OPENAI_API_KEY is required when using OpenAI embedding provider');
   }
-  
+
   if (config.embedding.provider === 'gemini' && !config.embedding.apiKey) {
     throw new Error('GEMINI_API_KEY is required when using Gemini embedding provider');
+  }
+
+  if (config.vectorStore.provider === 'postgres' && !config.vectorStore.password) {
+    throw new Error('POSTGRES_PASSWORD is required when using PostgreSQL vector store');
   }
 
   return config;

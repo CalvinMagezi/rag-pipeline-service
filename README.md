@@ -124,8 +124,16 @@ GEMINI_API_KEY=your_key           # Required for Gemini
 OPENAI_API_KEY=your_key           # Required for OpenAI
 
 # Vector Store
-VECTOR_STORE_PROVIDER=filesystem  # Local file storage
-VECTOR_STORE_PATH=./data/vectors
+VECTOR_STORE_PROVIDER=filesystem  # 'filesystem', 'postgres', or 'in-memory'
+VECTOR_STORE_PATH=./data/vectors  # For filesystem only
+
+# PostgreSQL Vector Store (optional)
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=raguser
+POSTGRES_PASSWORD=ragpassword
+POSTGRES_DB=ragdb
+POSTGRES_TABLE=vectors
 
 # Document Processing
 CHUNKING_STRATEGY=recursive       # Text splitting strategy
@@ -141,7 +149,8 @@ CHUNK_OVERLAP=50                  # Overlap between chunks
 - ✅ **Gemini** (text-embedding-004, 768 dimensions)
 - ✅ **OpenAI** (text-embedding-3-small, 1536 dimensions)
 
-### Vector Stores  
+### Vector Stores
+- ✅ **PostgreSQL** with pgvector (Scalable production storage with native similarity search)
 - ✅ **Filesystem** (JSON-based local storage)
 - ✅ **In-Memory** (Development/testing)
 - 🚧 Pinecone, Weaviate, Qdrant (planned)

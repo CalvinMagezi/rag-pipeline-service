@@ -10,6 +10,7 @@ import {
 import {
   InMemoryVectorStore,
   FilesystemVectorStore,
+  PostgresVectorStore,
   MockEmbeddingProvider,
   OpenAIEmbeddingProvider,
   GeminiEmbeddingProvider,
@@ -35,6 +36,20 @@ export class ProviderFactory {
           throw new Error('storagePath is required for filesystem vector store');
         }
         return new FilesystemVectorStore({ storagePath: config.storagePath });
+
+      case 'postgres':
+        if (!config.host || !config.database || !config.user || !config.password) {
+          throw new Error('host, database, user, and password are required for postgres vector store');
+        }
+        return new PostgresVectorStore({
+          host: config.host,
+          port: config.port || 5432,
+          database: config.database,
+          user: config.user,
+          password: config.password,
+          table: config.table,
+          maxConnections: config.maxConnections,
+        });
 
       case 'pinecone':
         throw new Error('Pinecone vector store not yet implemented');

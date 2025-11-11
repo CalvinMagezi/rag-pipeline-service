@@ -15,8 +15,8 @@ This is a TypeScript monorepo for a RAG (Retrieval-Augmented Generation) pipelin
 ### Key Patterns
 
 The codebase follows a provider pattern with factory initialization:
-- Vector stores (in-memory, filesystem, future: Pinecone, Weaviate, Qdrant)
-- Embedding providers (mock, OpenAI, future: Cohere, HuggingFace) 
+- Vector stores (in-memory, filesystem, postgres with pgvector, future: Pinecone, Weaviate, Qdrant)
+- Embedding providers (mock, OpenAI, Gemini, future: Cohere, HuggingFace)
 - Document loaders (text, PDF, future: JSON)
 
 The API server in `apps/rag-api/src/server.ts:28-31` initializes providers using `ProviderFactory` and creates `IngestionPipeline` and `QueryPipeline` instances.
@@ -80,16 +80,41 @@ pnpm --filter=@rag-pipeline/providers dev
 export OPENAI_API_KEY=your-openai-key
 export GEMINI_API_KEY=your-gemini-key
 
+# Optional: Set PostgreSQL credentials (uses defaults if not set)
+export POSTGRES_USER=raguser
+export POSTGRES_PASSWORD=ragpassword
+export POSTGRES_DB=ragdb
+
 # Run with Docker Compose (recommended for production)
 docker-compose up -d
 
 # Check deployment status
 docker-compose ps
 docker-compose logs rag-api
+docker-compose logs postgres
 
 # Stop deployment
 docker-compose down
+
+# Stop and remove volumes (WARNING: deletes data)
+docker-compose down -v
 ```
+
+#### Using PostgreSQL Vector Store
+
+To use PostgreSQL with pgvector instead of the default filesystem storage:
+
+1. Set environment variable in docker-compose.yml or .env:
+   ```bash
+   VECTOR_STORE_PROVIDER=postgres
+   ```
+
+2. PostgreSQL with pgvector extension will automatically:
+   - Create the necessary tables and indexes
+   - Enable the pgvector extension
+   - Support cosine similarity search for vector embeddings
+
+3. Data persists in the `postgres-data` Docker volume
 
 #### Manual Docker Build and Run
 ```bash
@@ -126,9 +151,20 @@ docker run -d \
 
 Configuration is handled via environment variables (see `.env.example`):
 
-- **VECTOR_STORE_PROVIDER**: `in-memory` | `filesystem` | `pinecone` | `weaviate` | `qdrant`
-- **EMBEDDING_PROVIDER**: `mock` | `openai` | `cohere` | `huggingface`
+- **VECTOR_STORE_PROVIDER**: `in-memory` | `filesystem` | `postgres` | `pinecone` | `weaviate` | `qdrant`
+- **EMBEDDING_PROVIDER**: `mock` | `openai` | `gemini` | `cohere` | `huggingface`
 - **CHUNKING_STRATEGY**: `character` | `token` | `recursive`
+
+### PostgreSQL Configuration
+
+When using `VECTOR_STORE_PROVIDER=postgres`, configure these environment variables:
+- **POSTGRES_HOST**: Database host (default: `localhost`)
+- **POSTGRES_PORT**: Database port (default: `5432`)
+- **POSTGRES_USER**: Database user (default: `raguser`)
+- **POSTGRES_PASSWORD**: Database password (required)
+- **POSTGRES_DB**: Database name (default: `ragdb`)
+- **POSTGRES_TABLE**: Table name for vectors (default: `vectors`)
+- **POSTGRES_MAX_CONNECTIONS**: Connection pool size (default: `10`)
 
 The API server loads config from `apps/rag-api/src/config/index.ts` which reads environment variables.
 

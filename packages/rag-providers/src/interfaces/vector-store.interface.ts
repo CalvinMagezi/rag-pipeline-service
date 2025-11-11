@@ -50,7 +50,7 @@ export interface IVectorStore {
  * Configuration for vector store providers
  */
 export interface VectorStoreConfig {
-  provider: 'in-memory' | 'filesystem' | 'pinecone' | 'weaviate' | 'qdrant';
+  provider: 'in-memory' | 'filesystem' | 'postgres' | 'pinecone' | 'weaviate' | 'qdrant';
   dimension?: number;
   [key: string]: any;
 }
