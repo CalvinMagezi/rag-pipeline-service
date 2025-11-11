@@ -12,7 +12,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/rag-api/package.json ./apps/rag-api/
 COPY packages/rag-core/package.json ./packages/rag-core/
 COPY packages/rag-providers/package.json ./packages/rag-providers/
-COPY packages/typescript-config ./packages/typescript-config/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
 
 # ===================================
 # Dependencies stage
@@ -36,13 +36,12 @@ COPY --from=deps /app/packages/rag-providers/node_modules ./packages/rag-provide
 # Copy source code
 COPY packages/rag-core ./packages/rag-core
 COPY packages/rag-providers ./packages/rag-providers
+COPY packages/typescript-config ./packages/typescript-config
 COPY apps/rag-api ./apps/rag-api
 COPY turbo.json ./
 
 # Build packages
-RUN pnpm build --filter=@rag-pipeline/core
-RUN pnpm build --filter=@rag-pipeline/providers
-RUN pnpm build --filter=@rag-pipeline/api
+RUN pnpm turbo build --filter=@rag-pipeline/core --filter=@rag-pipeline/providers --filter=@rag-pipeline/api
 
 # ===================================
 # Production stage
@@ -66,6 +65,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/rag-api/package.json ./apps/rag-api/
 COPY packages/rag-core/package.json ./packages/rag-core/
 COPY packages/rag-providers/package.json ./packages/rag-providers/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
 
 # Install production dependencies only
 RUN pnpm install --prod --frozen-lockfile

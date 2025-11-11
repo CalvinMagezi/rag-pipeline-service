@@ -12,6 +12,7 @@ import {
   FilesystemVectorStore,
   MockEmbeddingProvider,
   OpenAIEmbeddingProvider,
+  GeminiEmbeddingProvider,
   TextLoader,
   PDFLoader,
 } from '../implementations';
@@ -62,6 +63,16 @@ export class ProviderFactory {
           throw new Error('apiKey is required for OpenAI embedding provider');
         }
         return new OpenAIEmbeddingProvider({
+          apiKey: config.apiKey,
+          model: config.model,
+          dimension: config.dimension,
+        });
+
+      case 'gemini':
+        if (!config.apiKey) {
+          throw new Error('apiKey is required for Gemini embedding provider');
+        }
+        return new GeminiEmbeddingProvider({
           apiKey: config.apiKey,
           model: config.model,
           dimension: config.dimension,

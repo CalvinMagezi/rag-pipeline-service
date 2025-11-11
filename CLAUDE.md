@@ -73,13 +73,53 @@ pnpm --filter=@rag-pipeline/providers dev
 ```
 
 ### Docker
+
+#### Production Deployment with Docker Compose
 ```bash
-# Run with Docker Compose (recommended)
+# Set API keys in environment
+export OPENAI_API_KEY=your-openai-key
+export GEMINI_API_KEY=your-gemini-key
+
+# Run with Docker Compose (recommended for production)
 docker-compose up -d
 
-# Build and run manually
+# Check deployment status
+docker-compose ps
+docker-compose logs rag-api
+
+# Stop deployment
+docker-compose down
+```
+
+#### Manual Docker Build and Run
+```bash
+# Build the image
 docker build -f apps/rag-api/Dockerfile -t rag-api .
-docker run -p 3000:3000 rag-api
+
+# Run with OpenAI embeddings
+docker run -d \
+  -p 3000:3000 \
+  -e EMBEDDING_PROVIDER=openai \
+  -e OPENAI_API_KEY=your-key \
+  -e EMBEDDING_DIMENSION=1536 \
+  rag-api
+
+# Run with Gemini embeddings  
+docker run -d \
+  -p 3000:3000 \
+  -e EMBEDDING_PROVIDER=gemini \
+  -e GEMINI_API_KEY=your-key \
+  -e EMBEDDING_DIMENSION=768 \
+  rag-api
+```
+
+#### Testing Docker Deployment
+```bash
+# Run comprehensive tests
+./test-docker-deployment.sh
+
+# Test Gemini provider specifically
+./test-gemini-docker.sh
 ```
 
 ## Configuration

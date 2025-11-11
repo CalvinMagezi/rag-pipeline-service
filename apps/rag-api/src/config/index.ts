@@ -1,12 +1,13 @@
 import { config as dotenvConfig } from 'dotenv';
+import { resolve } from 'path';
 import { ChunkingConfig, IngestionConfig, QueryConfig } from '@rag-pipeline/core';
 import {
   VectorStoreConfig,
   EmbeddingConfig,
 } from '@rag-pipeline/providers';
 
-// Load environment variables
-dotenvConfig();
+// Load environment variables from the project root
+dotenvConfig({ path: resolve(__dirname, '../../../../.env') });
 
 /**
  * Application configuration
@@ -37,12 +38,40 @@ function getChunkingStrategy(): 'character' | 'token' | 'recursive' {
 }
 
 /**
+ * Get the appropriate API key based on embedding provider
+ */
+function getEmbeddingApiKey(provider?: string): string | undefined {
+  switch (provider?.toLowerCase()) {
+    case 'openai':
+      return process.env.OPENAI_API_KEY;
+    case 'gemini':
+      return process.env.GEMINI_API_KEY;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Get the appropriate model based on embedding provider
+ */
+function getEmbeddingModel(provider?: string): string {
+  switch (provider?.toLowerCase()) {
+    case 'openai':
+      return process.env.EMBEDDING_MODEL || 'text-embedding-3-small';
+    case 'gemini':
+      return process.env.GEMINI_MODEL || 'text-embedding-004';
+    default:
+      return 'mock-model';
+  }
+}
+
+/**
  * Load and validate configuration from environment
  */
 export function loadConfig(): AppConfig {
   const config: AppConfig = {
     server: {
-      port: parseInt(process.env.PORT || '3000', 10),
+      port: parseInt(process.env.PORT || '8888', 10),
       host: process.env.HOST || '0.0.0.0',
       env: process.env.NODE_ENV || 'development',
     },
@@ -52,8 +81,8 @@ export function loadConfig(): AppConfig {
     },
     embedding: {
       provider: (process.env.EMBEDDING_PROVIDER as any) || 'mock',
-      apiKey: process.env.OPENAI_API_KEY,
-      model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
+      apiKey: getEmbeddingApiKey(process.env.EMBEDDING_PROVIDER),
+      model: getEmbeddingModel(process.env.EMBEDDING_PROVIDER),
       dimension: parseInt(process.env.EMBEDDING_DIMENSION || '384', 10),
     },
     chunking: {
@@ -79,6 +108,10 @@ export function loadConfig(): AppConfig {
   // Validate required fields
   if (config.embedding.provider === 'openai' && !config.embedding.apiKey) {
     throw new Error('OPENAI_API_KEY is required when using OpenAI embedding provider');
+  }
+  
+  if (config.embedding.provider === 'gemini' && !config.embedding.apiKey) {
+    throw new Error('GEMINI_API_KEY is required when using Gemini embedding provider');
   }
 
   return config;

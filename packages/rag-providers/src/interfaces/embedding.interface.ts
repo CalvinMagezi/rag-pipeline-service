@@ -32,7 +32,7 @@ export interface IEmbeddingProvider {
  * Configuration for embedding providers
  */
 export interface EmbeddingConfig {
-  provider: 'mock' | 'openai' | 'cohere' | 'huggingface';
+  provider: 'mock' | 'openai' | 'gemini' | 'cohere' | 'huggingface';
   model?: string;
   apiKey?: string;
   dimension?: number;
