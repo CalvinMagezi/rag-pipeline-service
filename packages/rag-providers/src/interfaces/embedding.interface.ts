@@ -32,9 +32,10 @@ export interface IEmbeddingProvider {
  * Configuration for embedding providers
  */
 export interface EmbeddingConfig {
-  provider: 'mock' | 'openai' | 'gemini' | 'cohere' | 'huggingface';
+  provider: 'mock' | 'openai' | 'gemini' | 'cohere' | 'huggingface' | 'ollama';
   model?: string;
   apiKey?: string;
+  apiUrl?: string; // For Ollama and other local providers
   dimension?: number;
   [key: string]: any;
 }

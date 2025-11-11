@@ -119,9 +119,11 @@ rag-pipeline-service/
 
 ```bash
 # Embedding Provider
-EMBEDDING_PROVIDER=gemini          # or 'openai'
+EMBEDDING_PROVIDER=gemini          # 'openai', 'gemini', or 'ollama'
 GEMINI_API_KEY=your_key           # Required for Gemini
 OPENAI_API_KEY=your_key           # Required for OpenAI
+OLLAMA_API_URL=http://localhost:11434  # For Ollama (local models)
+OLLAMA_MODEL=nomic-embed-text     # Ollama embedding model
 
 # Vector Store
 VECTOR_STORE_PROVIDER=filesystem  # Local file storage
@@ -138,10 +140,12 @@ CHUNK_OVERLAP=50                  # Overlap between chunks
 ## 🔌 Provider Support
 
 ### Embeddings
+- ✅ **Ollama** (Local models: nomic-embed-text, mxbai-embed-large, etc.)
 - ✅ **Gemini** (text-embedding-004, 768 dimensions)
 - ✅ **OpenAI** (text-embedding-3-small, 1536 dimensions)
+- 🚧 Cohere, HuggingFace (planned)
 
-### Vector Stores  
+### Vector Stores
 - ✅ **Filesystem** (JSON-based local storage)
 - ✅ **In-Memory** (Development/testing)
 - 🚧 Pinecone, Weaviate, Qdrant (planned)

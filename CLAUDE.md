@@ -16,7 +16,7 @@ This is a TypeScript monorepo for a RAG (Retrieval-Augmented Generation) pipelin
 
 The codebase follows a provider pattern with factory initialization:
 - Vector stores (in-memory, filesystem, future: Pinecone, Weaviate, Qdrant)
-- Embedding providers (mock, OpenAI, future: Cohere, HuggingFace) 
+- Embedding providers (mock, OpenAI, Gemini, Ollama, future: Cohere, HuggingFace)
 - Document loaders (text, PDF, future: JSON)
 
 The API server in `apps/rag-api/src/server.ts:28-31` initializes providers using `ProviderFactory` and creates `IngestionPipeline` and `QueryPipeline` instances.
@@ -104,11 +104,21 @@ docker run -d \
   -e EMBEDDING_DIMENSION=1536 \
   rag-api
 
-# Run with Gemini embeddings  
+# Run with Gemini embeddings
 docker run -d \
   -p 3000:3000 \
   -e EMBEDDING_PROVIDER=gemini \
   -e GEMINI_API_KEY=your-key \
+  -e EMBEDDING_DIMENSION=768 \
+  rag-api
+
+# Run with Ollama (local models)
+# Assumes Ollama is running on host
+docker run -d \
+  -p 3000:3000 \
+  -e EMBEDDING_PROVIDER=ollama \
+  -e OLLAMA_API_URL=http://host.docker.internal:11434 \
+  -e OLLAMA_MODEL=nomic-embed-text \
   -e EMBEDDING_DIMENSION=768 \
   rag-api
 ```
@@ -127,7 +137,7 @@ docker run -d \
 Configuration is handled via environment variables (see `.env.example`):
 
 - **VECTOR_STORE_PROVIDER**: `in-memory` | `filesystem` | `pinecone` | `weaviate` | `qdrant`
-- **EMBEDDING_PROVIDER**: `mock` | `openai` | `cohere` | `huggingface`
+- **EMBEDDING_PROVIDER**: `mock` | `openai` | `gemini` | `ollama` | `cohere` | `huggingface`
 - **CHUNKING_STRATEGY**: `character` | `token` | `recursive`
 
 The API server loads config from `apps/rag-api/src/config/index.ts` which reads environment variables.

@@ -13,6 +13,7 @@ import {
   MockEmbeddingProvider,
   OpenAIEmbeddingProvider,
   GeminiEmbeddingProvider,
+  OllamaEmbeddingProvider,
   TextLoader,
   PDFLoader,
 } from '../implementations';
@@ -74,6 +75,13 @@ export class ProviderFactory {
         }
         return new GeminiEmbeddingProvider({
           apiKey: config.apiKey,
+          model: config.model,
+          dimension: config.dimension,
+        });
+
+      case 'ollama':
+        return new OllamaEmbeddingProvider({
+          apiUrl: config.apiUrl,
           model: config.model,
           dimension: config.dimension,
         });

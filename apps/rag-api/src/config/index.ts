@@ -60,8 +60,22 @@ function getEmbeddingModel(provider?: string): string {
       return process.env.EMBEDDING_MODEL || 'text-embedding-3-small';
     case 'gemini':
       return process.env.GEMINI_MODEL || 'text-embedding-004';
+    case 'ollama':
+      return process.env.OLLAMA_MODEL || 'nomic-embed-text';
     default:
       return 'mock-model';
+  }
+}
+
+/**
+ * Get the API URL for providers that use custom endpoints
+ */
+function getApiUrl(provider?: string): string | undefined {
+  switch (provider?.toLowerCase()) {
+    case 'ollama':
+      return process.env.OLLAMA_API_URL || 'http://localhost:11434';
+    default:
+      return undefined;
   }
 }
 
@@ -82,6 +96,7 @@ export function loadConfig(): AppConfig {
     embedding: {
       provider: (process.env.EMBEDDING_PROVIDER as any) || 'mock',
       apiKey: getEmbeddingApiKey(process.env.EMBEDDING_PROVIDER),
+      apiUrl: getApiUrl(process.env.EMBEDDING_PROVIDER),
       model: getEmbeddingModel(process.env.EMBEDDING_PROVIDER),
       dimension: parseInt(process.env.EMBEDDING_DIMENSION || '384', 10),
     },
