@@ -6,24 +6,74 @@ A production-ready, provider-agnostic Retrieval-Augmented Generation (RAG) pipel
 
 This is a monorepo managed with Turborepo, consisting of:
 
-### Packages
+### 📦 Packages
 
 - **@rag-pipeline/core** - Core functionality including document chunking and pipeline orchestration
 - **@rag-pipeline/providers** - Provider abstractions and implementations for vector stores, embeddings, and document loaders
 - **@repo/typescript-config** - Shared TypeScript configurations
 
-### Apps
+### 🚀 Apps
 
-- **rag-api** - REST API service for ingestion and querying
-- **docs** - Documentation (Next.js)
-- **web** - Web interface (Next.js)
+- **rag-api** - REST API service for ingestion and querying (port 8888)
+- **web** - Web interface (Next.js React app on port 3333)
+
+### 📁 Project Structure
+
+```
+rag-pipeline-service/
+├── apps/
+│   ├── rag-api/          # FastAPI backend service
+│   └── web/              # Next.js web interface
+├── packages/
+│   ├── rag-core/         # Core RAG functionality  
+│   ├── rag-providers/    # Provider implementations
+│   └── typescript-config/ # Shared TypeScript configs
+├── scripts/              # Development and deployment scripts
+├── examples/             # Example files and test documents
+├── docs/                 # Documentation
+├── docker-compose.yml    # Docker orchestration
+└── README.md
+```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- pnpm 9.0.0+
+- Docker & Docker Compose (recommended)
+- Node.js 20+ & pnpm 9.0.0+ (for local development)
+
+### Docker Deployment (Recommended)
+
+1. **Clone and configure:**
+   ```bash
+   git clone <repo-url>
+   cd rag-pipeline-service
+   cp .env.example .env
+   # Add your API keys to .env
+   ```
+
+2. **Start services:**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access applications:**
+   - **Web Interface**: http://localhost:3333
+   - **RAG API**: http://localhost:8888
+   - **Status Check**: http://localhost:3333/api/status
+
+4. **Test the pipeline:**
+   ```bash
+   # Upload a document
+   curl -X POST http://localhost:3333/api/upload \
+     -F "file=@examples/test-upload.txt" \
+     -F "category=test"
+   
+   # Query the document
+   curl -X POST http://localhost:3333/api/query \
+     -H "Content-Type: application/json" \
+     -d '{"query": "Docker containers", "topK": 3}'
+   ```
 
 ### Local Development
 
@@ -32,116 +82,118 @@ This is a monorepo managed with Turborepo, consisting of:
    pnpm install
    ```
 
-2. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-3. **Build packages:**
+2. **Build packages:**
    ```bash
    pnpm build
    ```
 
-4. **Run development server:**
+3. **Start services:**
    ```bash
+   # Terminal 1: Start RAG API
    pnpm --filter=@rag-pipeline/api dev
+   
+   # Terminal 2: Start Web App
+   pnpm --filter=@rag-pipeline/web dev
    ```
 
-   The API will be available at `http://localhost:3000`
+## 📡 API Overview
 
-### Docker Deployment
+### Core Services
 
-1. **Using Docker Compose (recommended for local dev):**
-   ```bash
-   docker-compose up -d
-   ```
+- **Web App (port 3333)**: Full-featured React interface for document upload and querying
+- **RAG API (port 8888)**: Backend REST API for programmatic access
 
-2. **Build and run manually:**
-   ```bash
-   docker build -f apps/rag-api/Dockerfile -t rag-api .
-   docker run -p 3000:3000 rag-api
-   ```
+### Key Endpoints
 
-## 📡 API Endpoints
+- **GET** `/api/status` - System health and provider status
+- **POST** `/api/upload` - Upload documents via web interface  
+- **POST** `/api/query` - Query documents with enhanced metadata
+- **POST** `/ingest` - Direct API ingestion of raw text
+- **POST** `/query` - Direct API querying
 
-### Health Check
-
-- **GET** `/health` - Basic health check
-- **GET** `/health/detailed` - Detailed health with provider status
-
-### Ingestion
-
-- **POST** `/ingest` - Ingest raw text content
-  ```json
-  {
-    "content": "Your document text here...",
-    "metadata": {
-      "source": "optional-source"
-    }
-  }
-  ```
-
-- **POST** `/ingest/file` - Ingest a file
-  ```json
-  {
-    "filePath": "/path/to/document.txt",
-    "metadata": {}
-  }
-  ```
-
-### Query
-
-- **POST** `/query` - Query the RAG system
-  ```json
-  {
-    "query": "What is the main topic?",
-    "topK": 5,
-    "minScore": 0.7
-  }
-  ```
+> 📖 **Full API documentation**: [docs/API.md](docs/API.md)
 
 ## ⚙️ Configuration
 
-Configure via environment variables (see `.env.example`):
+### Environment Variables
 
-- **Vector Store:** `in-memory`, `filesystem`, `pinecone`, `weaviate`, `qdrant`
-- **Embeddings:** `mock`, `openai`, `cohere`, `huggingface`
-- **Chunking:** `character`, `token`, `recursive`
+```bash
+# Embedding Provider
+EMBEDDING_PROVIDER=gemini          # or 'openai'
+GEMINI_API_KEY=your_key           # Required for Gemini
+OPENAI_API_KEY=your_key           # Required for OpenAI
+
+# Vector Store
+VECTOR_STORE_PROVIDER=filesystem  # Local file storage
+VECTOR_STORE_PATH=./data/vectors
+
+# Document Processing
+CHUNKING_STRATEGY=recursive       # Text splitting strategy
+CHUNK_SIZE=512                    # Characters per chunk
+CHUNK_OVERLAP=50                  # Overlap between chunks
+```
+
+> 🔧 **Full configuration guide**: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ## 🔌 Provider Support
 
-### Vector Stores
-- ✅ In-Memory, ✅ Filesystem
+### Embeddings
+- ✅ **Gemini** (text-embedding-004, 768 dimensions)
+- ✅ **OpenAI** (text-embedding-3-small, 1536 dimensions)
+
+### Vector Stores  
+- ✅ **Filesystem** (JSON-based local storage)
+- ✅ **In-Memory** (Development/testing)
 - 🚧 Pinecone, Weaviate, Qdrant (planned)
 
-### Embeddings
-- ✅ Mock, ✅ OpenAI
-- 🚧 Cohere, HuggingFace (planned)
+### Document Types
+- ✅ **Text** (.txt, .md files)
+- ✅ **PDF** documents  
+- ✅ **JSON** data
+- Maximum file size: 10MB
 
-### Loaders
-- ✅ Text (.txt, .md), ✅ PDF
-- 🚧 JSON (planned)
+## 🛠️ Development & Testing
 
-## 📦 Development
+### Quick Commands
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Build all packages
+# Build all packages  
 pnpm build
 
 # Run tests
 pnpm test
 
-# Lint
+# Lint and type check
 pnpm lint
-
-# Type check
 pnpm check-types
 ```
 
-## 📝 License
+### Testing Scripts
+
+```bash
+# Test Docker deployment
+./scripts/test-docker-deployment.sh
+
+# Bulk ingest test documents
+./scripts/bulk-ingest.sh examples/test-documents/
+
+# Run query test suite
+./scripts/query-test-suite.sh
+```
+
+> 🧪 **Testing utilities**: [scripts/README.md](scripts/README.md)  
+> 📋 **Example documents**: [examples/README.md](examples/README.md)
+
+## 📚 Documentation
+
+- **[API Documentation](docs/API.md)** - Complete API reference
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Docker deployment and configuration
+- **[Scripts Documentation](scripts/README.md)** - Development and testing scripts  
+- **[Examples](examples/README.md)** - Sample documents and usage examples
+
+## 📄 License
 
 MIT
